@@ -15,6 +15,7 @@
 1. Клонируйте репозиторий:
    ``` bash
    git clone https://github.com/Sant1s/MIPTFormal.git
+   cd MIPTFormal
    ```
 2. Перейдите в ветку Алгоритма:
    ``` bash

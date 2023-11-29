@@ -32,7 +32,7 @@
    ``` bash
    pip install -r requirements.txt
    ```
-5. Запустите приложение через `main.py` для использования и через `tests.py` для тестов:
+5. Запустите приложение через `main.py` для использования и через `pytest` для тестов:
    ``` bash
    # для использования
    python3 main.py # для Linux/Mac

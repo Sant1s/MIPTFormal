@@ -8,14 +8,14 @@ from dataclasses import dataclass, field
 
 
 @dataclass(order=True)
-class Parser:
+class LRParser:
     grammar: Grammar
     states: dict = field(default_factory=dict)
     transitions: dict = field(default_factory=dict)
-    is_grammar_ok: bool = True
-    old_start: str = ""
+    suit: bool = True
+    start: str = ""
     new_start: str = ""
-    table: dict = field(default_factory=dict)
+    lr_table: dict = field(default_factory=dict)
 
     def first(self, symbols: list[str]) -> set[str]:
         if len(symbols) == 0 or symbols[0] == '$':
@@ -62,7 +62,7 @@ class Parser:
         return self.closure(new_situations)
 
     def build_states(self, new_start: str, old_start: str) -> None:
-        self.old_start = old_start
+        self.start = old_start
         self.new_start = new_start
         start = self.closure({Situation(new_start, [old_start], 0, '$')})
         self.states[start] = "q0"
@@ -87,17 +87,17 @@ class Parser:
         for state, name in self.states.items():
             for situation in state.situations:
                 if situation.dot_pos == len(situation.right_part):
-                    self.table.setdefault(name, {})
+                    self.lr_table.setdefault(name, {})
                     if situation.left_non_terminal == self.new_start:
-                        self.table[name][situation.next_letter] = LrTableState.get_accept()
+                        self.lr_table[name][situation.next_letter] = LrTableState.get_accept()
                     else:
-                        self.table[name][situation.next_letter] = LrTableState.get_reduce(
+                        self.lr_table[name][situation.next_letter] = LrTableState.get_reduce(
                             GrammarRule(situation.left_non_terminal, situation.right_part))
                 else:
-                    self.table.setdefault(name, {})
+                    self.lr_table.setdefault(name, {})
                     for symbol, goto_state in self.transitions[name].items():
-                        self.table.setdefault(name, {})
-                        self.table[name][symbol] = LrTableState.get_shift(goto_state)
+                        self.lr_table.setdefault(name, {})
+                        self.lr_table[name][symbol] = LrTableState.get_shift(goto_state)
 
     def predict(self, word: str) -> bool:
         word = word + '$'
@@ -106,8 +106,8 @@ class Parser:
         path.append("q0")
         while word_pos < len(word):
             state = path[-1]
-            self.table.setdefault(state, {})
-            table_pos = self.table[state].get(word[word_pos])
+            self.lr_table.setdefault(state, {})
+            table_pos = self.lr_table[state].get(word[word_pos])
             if table_pos is None:
                 return False
             elif table_pos.state_type == ACCEPT:
@@ -122,6 +122,6 @@ class Parser:
                     path.pop()
                 new_state = path[-1]
                 path.append(table_pos.rule.left_non_terminal)
-                self.table.setdefault(new_state, {})
-                new_table_pos = self.table[new_state].get(table_pos.rule.left_non_terminal)
+                self.lr_table.setdefault(new_state, {})
+                new_table_pos = self.lr_table[new_state].get(table_pos.rule.left_non_terminal)
                 path.append(new_table_pos.goto_state)

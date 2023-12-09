@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field
-from typing import Dict, Set
 
 
 @dataclass(init=True)
@@ -13,7 +12,7 @@ class GrammarRule:
 
 @dataclass
 class Grammar:
-    alphabet: Dict[str, bool] = field(default_factory=dict)
-    rules: Set[GrammarRule] = field(default_factory=set)
+    alphabet: dict[str, bool] = field(default_factory=dict)
+    rules: set[GrammarRule] = field(default_factory=set)
     start: str = ""
     new_start: str = ""
